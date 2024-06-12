@@ -251,7 +251,7 @@ export const changePassword=async(req,res,next)=>{
             message:"Password changed successfully"
         })
     }catch(error){
-        return next(400,error.message)
+        return next(errorhandler(400,error.message))
     }
 }
 export const updateUser=async(req,res,next)=>{
@@ -285,7 +285,7 @@ export const updateUser=async(req,res,next)=>{
       } 
       catch (error) {
         return next(
-        errorhandler(400,error || 'File not uploaded, please try again' )
+        errorhandler(400,error.message )
         );
       }
       await user.save();

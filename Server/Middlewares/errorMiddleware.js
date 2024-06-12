@@ -7,4 +7,4 @@ const errorMiddleware=(err,req,res,next)=>{
         message:err.message,
     })
 }
-export default  errorMiddleware
+export default errorMiddleware

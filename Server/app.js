@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import errorMiddleware from './Middlewares/errorMiddleware.js'
 import authRoutes from './Routes/authRoutes.js'
+import courseRoutes from './Routes/courseRoutes.js'
 const app=express()
 
 
@@ -11,6 +12,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
 app.use('/user',authRoutes)
+app.use('/courses',courseRoutes)
 app.use(errorMiddleware)
 app.use(cors({
     user:"*",

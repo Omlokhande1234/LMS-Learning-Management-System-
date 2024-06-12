@@ -27,3 +27,16 @@ export const isLoggedin=(req,res,next)=>{
     }
 
 }
+
+export const authorizeRoles=(...roles)=>(req,res,next)=>{
+    try{
+        const currentRoles=req.user.role
+        if(!roles.includes(currentRoles)){
+            return next(errorhandler(400,"You dont have permission to access this route"))
+        }
+        next()
+    }
+    catch(error){
+        return next(errorhandler(400,error.message))
+    }
+}

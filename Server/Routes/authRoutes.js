@@ -13,5 +13,5 @@ router.post('/google',google)
 router.post('/reset',forgot)
 router.post('/reset/:resetToken',reset)
 router.post('/change-password',isLoggedin,changePassword)
-router.post('/update/:id',isLoggedin,upload.single("avatar"),updateUser)
+router.put('/update/:id',isLoggedin,upload.single("avatar"),updateUser)
 export default router
