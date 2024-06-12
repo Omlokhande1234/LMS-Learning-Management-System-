@@ -1,4 +1,4 @@
-
+import crypto from 'crypto'
 import dotenv from 'dotenv'
 dotenv.config()
 import { Schema, model } from 'mongoose';
@@ -66,7 +66,16 @@ userSchema.methods = {
               expiresIn: process.env.JWT_EXPIRE,
             }
           );
-   
+  },
+  generatePasswordResetToken:async function(){
+    const resetToken=crypto.randomBytes(20).toString('hex')
+    this.forgotPasswordToken=crypto
+     .createHash('sha256')
+     .update(resetToken)
+     .digest('hex')
+    this.forgotPasswordExpiry=Date.now()+15*60*1000 //Token valid for 15 min from now
+    return resetToken
+
   }
 };
 

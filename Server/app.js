@@ -7,8 +7,10 @@ const app=express()
 
 
 app.use(express.json())
+//Used to parse the info from the encoded url
+app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
-app.use('/api/auth',authRoutes)
+app.use('/user',authRoutes)
 app.use(errorMiddleware)
 app.use(cors({
     user:"*",
