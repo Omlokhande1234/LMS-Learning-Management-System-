@@ -16,9 +16,6 @@ export const getAllCourses=async(req,res,next)=>{
     catch(error){
         return next(errorhandler(400,error.message))
     }
-
-    
-
 }
 export const getLecturesById=async(req,res,next)=>{
     const {id}=req.params
@@ -141,7 +138,11 @@ export const addLecturesByID=async(req,res,next)=>{
     try{
         const{title,description}=req.body
         const{id}=req.params
-        let lectureData={}
+        let lectureData={
+            title,
+            description,
+            lecture:{}
+        }
         if(!title||!description){
             return next(errorhandler(400,"All the fields are required"))
         }
@@ -159,8 +160,8 @@ export const addLecturesByID=async(req,res,next)=>{
                 if(!result){
                     return next(errorhandler(400,"error in uploading video"))
                 }
-                lectureData.public_id=result.public_id
-                lectureData.secure_url=result.secure_url
+                lectureData.lecture.public_id=result.public_id
+                lectureData.lecture.secure_url=result.secure_url
  
                 fs.rm(`uploads/${req.file.filename}`)
 
@@ -170,17 +171,23 @@ export const addLecturesByID=async(req,res,next)=>{
             }
 
         }
-        course.lectures.push({
-            title,
-            description,
-            lecture:lectureData
-        })
+        course.lectures.push(lectureData)
         course.NumberOfLectures=course.lectures.length
         await course.save()
         return res.status(200).json({
             success:true,
-            message:"Lectures added to course successfully"
+            message:"Lectures added to course successfully",
+            course
         })
+
+    }
+    catch(error){
+        return next(errorhandler(400,error.message))
+    }
+}
+export const removeLecturesById=async(req,res,next)=>{
+    try{
+        const{id}=req.params
 
     }
     catch(error){

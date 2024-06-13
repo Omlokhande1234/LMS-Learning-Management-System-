@@ -177,8 +177,8 @@ export const forgot=async(req,res,next)=>{
     const message = `You can reset your password by clicking <a href=${resetPasswordUrl} target="_blank">Reset your password</a>
     \nIf the above link does not work for some reason then copy paste this link in 
     new tab ${resetPasswordUrl}.\n If you have not requested this, kindly ignore.`;
-    console.log(resetToken)
-    console.log(resetPasswordUrl)
+    // console.log(resetToken)
+    // console.log(resetPasswordUrl)
     try{
         await sendEmail(email,subject,message)
         res.status(200).json({
