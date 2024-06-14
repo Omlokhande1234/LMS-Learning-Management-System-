@@ -80,8 +80,10 @@ export const Signup=async(req,res,next)=>{
 
     }
     catch(error){
+        
         return next(errorhandler(400,error.message))
     }
+    
 }
 export const signin=async (req,res,next)=>{
     const{email,password}=req.body
@@ -93,13 +95,13 @@ export const signin=async (req,res,next)=>{
         if(!user||!bcrypt.compareSync(password,user.password)){
             return next(errorhandler(400,"Invalid email or password"))
         }
-        const token=user.generateJWTToken()
-        const{password:pass,...rest}=user._doc
+        const token=await user.generateJWTToken()
+        //const{password:pass,...rest}=user._doc
         res.cookie('token',token,cookieOptions)
         res.status(200).json({
             success:true,
             message:"User logged in successfully",
-            rest
+            user
         })
 
     }

@@ -51,11 +51,13 @@ export const BuySubscription=async(req,res,next)=>{
 
     }
     catch(error){
+        console.log(error)
         return next(errorhandler(400,error.message))
     }
 }
 export const verifySubscription=async(req,res,next)=>{
     try{
+        
 
     }
     catch(error){
