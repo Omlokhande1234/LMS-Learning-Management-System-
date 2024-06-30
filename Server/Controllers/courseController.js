@@ -39,7 +39,7 @@ export const createCourse=async(req,res,next)=>{
     const{title,
         description,
         category,
-        createdBy
+        createdBy,
     }=req.body
     try{
         if(!title,!description,!category,!createdBy){
