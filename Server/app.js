@@ -19,7 +19,7 @@ app.use('/payment',paymentRoutes)
 app.use('/googleApi',googleRoutes)
 app.use(errorMiddleware)
 app.use(cors({
-    origin:"*",
+    origin:"http://localhost:3000",
     credentials:true
 }))
 
