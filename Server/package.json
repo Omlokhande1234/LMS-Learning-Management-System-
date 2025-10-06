@@ -7,7 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+     "build": "babel Controllers Models Routes utils \"Database Config\" Middlewares app.js index.js --out-dir dist --copy-files"
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +28,9 @@
     "razorpay": "^2.9.4"
   },
   "devDependencies": {
+    "@babel/cli": "^7.28.3",
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
     "@types/nodemailer": "^6.4.15"
   }
 }
