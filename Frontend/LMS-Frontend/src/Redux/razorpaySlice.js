@@ -14,7 +14,8 @@ const initialState = {
 // function to get the api key
 export const getRazorPayId = createAsyncThunk("/razorPayId/get", async () => {
   try {
-    const res = await axiosInstance.get("/payments/razorpay-key");
+    // Backend: app.use('/payment', paymentRoutes); router.get('/razorpay-key')
+    const res = await axiosInstance.get("/payment/razorpay-key");
     return res.data;
   } catch (error) {
     toast.error("Failed to load data");
@@ -26,7 +27,8 @@ export const purchaseCourseBundle = createAsyncThunk(
   "/purchaseCourse",
   async () => {
     try {
-      const res = await axiosInstance.post("/payments/subscribe");
+      // Backend: router.post('/subscription')
+      const res = await axiosInstance.post("/payment/subscription");
       return res.data;
     } catch (error) {
       toast.error(error?.response?.data?.message);
@@ -39,7 +41,8 @@ export const verifyUserPayment = createAsyncThunk(
   "/verifyPayment",
   async (paymentDetail) => {
     try {
-      const res = await axiosInstance.post("/payments/verify", {
+      // Backend: router.post('/verify')
+      const res = await axiosInstance.post("/payment/verify", {
         razorpay_payment_id: paymentDetail.razorpay_payment_id,
         razorpay_subscription_id: paymentDetail.razorpay_subscription_id,
         razorpay_signature: paymentDetail.razorpay_signature,
@@ -54,14 +57,20 @@ export const verifyUserPayment = createAsyncThunk(
 // function to get all the payment record
 export const getPaymentRecord = createAsyncThunk("paymentrecord", async () => {
   try {
-    const res = axiosInstance.get("/payments?count=100");
-    toast.promise(res, {
-      loading: "Getting the payments record...",
-      success: (data) => {
-        return data?.data?.message;
+    // Backend: router.get('/') -> '/payment'
+    const res = axiosInstance.get("/payment?count=100");
+    toast.promise(
+      res,
+      {
+        loading: "Getting the payments record...",
+        success: (data) => data?.data?.message,
+        error: "Failed to get payment records",
       },
-      error: "Failed to get payment records",
-    });
+      {
+        id: "payments-record",
+        duration: 2000,
+      }
+    );
 
     const response = await res;
     return response.data;
@@ -75,7 +84,8 @@ export const cancelCourseBundle = createAsyncThunk(
   "/cancelCourse",
   async () => {
     try {
-      const res = axiosInstance.post("/payments/unsubscribe");
+      // Backend: router.post('/unsubscribe')
+      const res = axiosInstance.post("/payment/unsubscribe");
       toast.promise(res, {
         loading: "Unsubscribing the bundle...",
         success: "Bundle unsubscibed successfully",

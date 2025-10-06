@@ -12,6 +12,7 @@ const cookieOptions = {
     secure: true ,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     httpOnly: true,
+    sameSite: 'None',
   }
 export const Signup=async(req,res,next)=>{
     const{username,email,password}=req.body
@@ -111,7 +112,7 @@ export const signin=async (req,res,next)=>{
 }
 export const signout=async(req,res,next)=>{
     try{
-        res.clearcookie('token')
+        res.clearCookie('token')
         res.status(200).json({
             success:true,
             message:"User logged out successfully"

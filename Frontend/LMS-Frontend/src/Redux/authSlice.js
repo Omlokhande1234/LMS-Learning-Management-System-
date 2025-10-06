@@ -3,15 +3,16 @@ import { toast } from "react-hot-toast";
 import axiosInstance from "../Helper/axiosInstance";
 
 const initialState = {
-  isLoggedIn: localStorage.getItem("isLoggedIn") || false,
-  data: JSON.parse(localStorage.getItem("data")) || {},
+  isLoggedIn: localStorage.getItem("isLoggedIn") === "true",
+  data: localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data")) : {},
   role: localStorage.getItem("role") || "",
 };
 
 // function to handle signup
-export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
+export const createAccount = createAsyncThunk("/user/signup", async (data) => {
   try {
-    let res = axiosInstance.post("user/register", data);
+    // Backend route: app.use('/user', authRoutes) -> router.post('/signup')
+    let res = axiosInstance.post("/user/signup", data);
 
     toast.promise(res, {
       loading: "Wait! Creating your account",
@@ -21,63 +22,58 @@ export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
       error: "Failed to create account",
     });
 
-    // getting response resolved here
     res = await res;
     return res.data;
   } catch (error) {
-    toast.error(error?.response?.data?.message);
+    toast.error(error?.response?.data?.message || error.message);
   }
 });
+
+// function to fetch user data
+export const getUserData = createAsyncThunk("/user/getuser", async () => {
+  try {
+    // Backend route: router.get('/getuser')
+    const res = await axiosInstance.get("/user/getuser");
+    return res?.data;
+  } catch (error) {
+    toast.error(error?.response?.data?.message || error.message);
+  }
+});
+// (old misplaced changePassword block removed)
 
 // function to handle login
 export const login = createAsyncThunk("auth/login", async (data) => {
   try {
-    let res = axiosInstance.post("/user/login", data);
+    let res = axiosInstance.post("/user/signin", data);
 
     await toast.promise(res, {
       loading: "Loading...",
-      success: (data) => {
-        return data?.data?.message;
-      },
+      success: (d) => d?.data?.message,
       error: "Failed to log in",
     });
 
-    // getting response resolved here
     res = await res;
     return res.data;
   } catch (error) {
-    toast.error(error.message);
+    toast.error(error?.response?.data?.message || error.message);
   }
 });
 
 // function to handle logout
 export const logout = createAsyncThunk("auth/logout", async () => {
   try {
-    let res = axiosInstance.post("/user/logout");
+    let res = axiosInstance.get("/user/signout");
 
     await toast.promise(res, {
       loading: "Loading...",
-      success: (data) => {
-        return data?.data?.message;
-      },
+      success: (d) => d?.data?.message,
       error: "Failed to log out",
     });
 
-    // getting response resolved here
     res = await res;
     return res.data;
   } catch (error) {
-    toast.error(error.message);
-  }
-});
-
-// function to fetch user data
-export const getUserData = createAsyncThunk("/user/details", async () => {
-  try {
-    const res = await axiosInstance.get("/user/me");
-    return res?.data;
-  } catch (error) {
-    toast.error(error.message);
+    toast.error(error?.response?.data?.message || error.message);
   }
 });
 
@@ -90,17 +86,14 @@ export const changePassword = createAsyncThunk(
 
       await toast.promise(res, {
         loading: "Loading...",
-        success: (data) => {
-          return data?.data?.message;
-        },
+        success: (d) => d?.data?.message,
         error: "Failed to change password",
       });
 
-      // getting response resolved here
       res = await res;
       return res.data;
     } catch (error) {
-      toast.error(error?.response?.data?.message);
+      toast.error(error?.response?.data?.message || error.message);
     }
   }
 );
@@ -120,7 +113,6 @@ export const forgetPassword = createAsyncThunk(
         error: "Failed to send verification email",
       });
 
-      // getting response resolved here
       res = await res;
       return res.data;
     } catch (error) {
@@ -143,7 +135,7 @@ export const updateProfile = createAsyncThunk(
         },
         error: "Failed to update profile",
       });
-      // getting response resolved here
+      
       res = await res;
       return res.data;
     } catch (error) {
@@ -166,7 +158,7 @@ export const resetPassword = createAsyncThunk("/user/reset", async (data) => {
       },
       error: "Failed to reset password",
     });
-    // getting response resolved here
+    
     res = await res;
     return res.data;
   } catch (error) {
@@ -182,29 +174,34 @@ const authSlice = createSlice({
     builder
       // for user login
       .addCase(login.fulfilled, (state, action) => {
-        localStorage.setItem("data", JSON.stringify(action?.payload?.user));
-        localStorage.setItem("isLoggedIn", true);
-        localStorage.setItem("role", action?.payload?.user?.role);
-        state.isLoggedIn = true;
-        state.data = action?.payload?.user;
-        state.role = action?.payload?.user?.role;
+        if (action?.payload?.user) {
+          localStorage.setItem("data", JSON.stringify(action.payload.user));
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("role", action.payload.user.role);
+          state.isLoggedIn = true;
+          state.data = action.payload.user;
+          state.role = action.payload.user.role;
+        }
       })
       // for user logout
       .addCase(logout.fulfilled, (state) => {
         localStorage.clear();
         state.isLoggedIn = false;
         state.data = {};
+        state.role = "";
       })
       // for user details
       .addCase(getUserData.fulfilled, (state, action) => {
-        localStorage.setItem("data", JSON.stringify(action?.payload?.user));
-        localStorage.setItem("isLoggedIn", true);
-        state.isLoggedIn = true;
-        state.data = action?.payload?.user;
-        state.role = action?.payload?.user?.role;
+        if (action?.payload?.user) {
+          localStorage.setItem("data", JSON.stringify(action.payload.user));
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("role", action.payload.user.role);
+          state.isLoggedIn = true;
+          state.data = action.payload.user;
+          state.role = action.payload.user.role;
+        }
       });
   },
 });
 
-export const {} = authSlice.actions;
 export default authSlice.reducer;

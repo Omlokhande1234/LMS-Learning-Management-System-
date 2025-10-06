@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Layout from "../../Layout/Layout";
 import {
   Chart as ChartJS,
@@ -98,13 +98,17 @@ const AdminDashboard = () => {
     }
   };
 
+  // Guard to avoid double invocation in React StrictMode (dev)
+  const didFetchRef = useRef(false);
   useEffect(() => {
+    if (didFetchRef.current) return;
+    didFetchRef.current = true;
     (async () => {
       await dispatch(getAllCourses());
       await dispatch(getStatsData());
       await dispatch(getPaymentRecord());
     })();
-  }, []);
+  }, [dispatch]);
 
   return (
     <Layout>

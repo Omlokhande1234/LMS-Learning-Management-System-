@@ -7,3 +7,7 @@ body{
    max-width: 1440px;
    margin: auto;
 }
+
+#root {
+   min-height: 100vh;
+}

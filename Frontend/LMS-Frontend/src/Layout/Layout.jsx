@@ -60,7 +60,8 @@ const Layout = ({ children }) => {
 
         <div className="drawer-side w-0">
           <label htmlFor="my-drawer" className="drawer-overlay"></label>
-          <ul className="menu p-4 w-48 sm:w-80 bg-base-100 text-base-content relative">
+          {/* Make the menu take full height and use flex column to push footer actions to bottom */}
+          <ul className="menu p-4 w-48 sm:w-80 bg-base-100 text-base-content relative h-screen flex flex-col overflow-y-auto">
             {/* close button for drawer */}
             <li className="w-fit absolute right-2 z-50">
               <button onClick={hideDrawer}>
@@ -94,12 +95,12 @@ const Layout = ({ children }) => {
             {/* creating the bottom part of drawer */}
             {/* if user is not logged in */}
             {!isLoggedIn && (
-              <li className="absolute bottom-4 w-[90%]">
-                <div className="w-full flex items-center justify-center">
-                  <button className="btn-primary px-4 py-1 font-semibold rounded-md w-full">
+              <li className="mt-auto w-full">
+                <div className="w-full flex items-center justify-center gap-3">
+                  <button className="btn-primary px-4 py-2 font-semibold rounded-md w-1/2">
                     <Link to={"/login"}>Login</Link>
                   </button>
-                  <button className="btn-secondary px-4 py-1 font-semibold rounded-md w-full">
+                  <button className="btn-secondary px-4 py-2 font-semibold rounded-md w-1/2">
                     <Link to={"/signup"}>Signup</Link>
                   </button>
                 </div>
@@ -108,12 +109,12 @@ const Layout = ({ children }) => {
 
             {/* if user is logged in */}
             {isLoggedIn && (
-              <li className="absolute bottom-4 w-[90%]">
-                <div className="w-full flex items-center justify-center">
-                  <button className="btn-primary px-4 py-1 font-semibold rounded-md w-full">
+              <li className="mt-auto w-full">
+                <div className="w-full flex items-center justify-center gap-3">
+                  <button className="btn-primary px-4 py-2 font-semibold rounded-md w-1/2">
                     <Link to={"/user/profile"}>Profile</Link>
                   </button>
-                  <button className="btn-secondary px-4 py-1 font-semibold rounded-md w-full">
+                    <button className="btn-secondary px-4 py-2 font-semibold rounded-md w-1/2">
                     <Link onClick={handleLogout}>Logout</Link>
                   </button>
                 </div>
