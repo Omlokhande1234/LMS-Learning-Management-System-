@@ -13,21 +13,23 @@ const app=express()
 
 // CORS should be before routes
 app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-}))
-
+  origin: ['http://localhost:5173', 'https://lms-frontend-1-fq47.onrender.com/'], 
+  credentials: true
+}));
+// Handle preflight requests explicitly
+app.options('*', cors());
+app.use('/api/v1/payment/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json())
 //Used to parse the info from the encoded url
 app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
 
-app.use('/user',authRoutes)
-app.use('/courses',courseRoutes)
-app.use('/payment',paymentRoutes)
-app.use('/googleApi',googleRoutes)
-app.use('/admin',adminRoutes)
+app.use('/api/user',authRoutes)
+app.use('/api/courses',courseRoutes)
+app.use('/api/payment',paymentRoutes)
+app.use('/api/googleApi',googleRoutes)
+app.use('/api/admin',adminRoutes)
 app.use(errorMiddleware)
 
 

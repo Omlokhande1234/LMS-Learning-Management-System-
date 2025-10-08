@@ -4,23 +4,24 @@ import { razorPay } from "../index.js";
 import { errorhandler } from "../utils/errorHandler.js";
 import dotenv from 'dotenv'
 import crypto from 'crypto'
-import { createDeflate } from "zlib";
 dotenv.config()
+
 export const getRazorpayKey=async(req,res,next)=>{
     try{
             res.status(200).json({
             success:true,
             message:"RazorPay api key fetched",
             key:process.env.RAZORPAY_KEY_ID
-         })
+           })
     }
     catch(error){
         return next(errorhandler(400,error.message))
     }
 }
+
 export const BuySubscription=async(req,res,next)=>{
     try{
-          // Extracting ID from request obj
+            // Extracting ID from request obj
         const {id}=req.user
         // Finding the user based on the ID
         const user=await User.findById(id)
@@ -59,7 +60,10 @@ export const BuySubscription=async(req,res,next)=>{
         return next(errorhandler(400,error.message))
     }
 }
+
 export const verifySubscription = async (req, res, next) => {
+  // THIS IS YOUR ORIGINAL FUNCTION, CALLED BY THE FRONTEND.
+  // It's good to keep as a fallback, but the webhook is more reliable.
   try {
     // Get the Id of the user
     const { id } = req.user;
@@ -90,7 +94,7 @@ export const verifySubscription = async (req, res, next) => {
 
     // Persist payment
     await Payment.create({
-      Payment_id: razorpay_payment_id,
+      payment_id: razorpay_payment_id, // Corrected key name to match model
       subscription_id: razorpay_subscription_id,
       signature: razorpay_signature,
     });
@@ -108,6 +112,64 @@ export const verifySubscription = async (req, res, next) => {
     return next(errorhandler(400, error.message));
   }
 };
+
+// WEBHOOK HANDLER - CALLED DIRECTLY BY RAZORPAY
+export const razorpayWebhook = async (req, res) => {
+  try {
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    const razorpaySignature = req.headers['x-razorpay-signature'];
+
+    // Verify signature
+    const shasum = crypto.createHmac('sha256', webhookSecret);
+    const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
+    shasum.update(rawBody);
+    const digest = shasum.digest('hex');
+
+    if (digest !== razorpaySignature) {
+      console.log('⚠️ Webhook signature validation failed.');
+      return res.status(400).json({ status: 'error', message: 'Invalid signature' });
+    }
+
+    console.log('✅ Webhook signature validated successfully.');
+
+    // Parse raw body
+    const event = JSON.parse(rawBody.toString());
+
+    if (event.event === 'payment.captured') {
+      const { payment } = event.payload;
+      const subscriptionId = payment.entity.subscription_id;
+      const paymentId = payment.entity.id;
+
+      if (subscriptionId) {
+        const user = await User.findOne({ 'subscription.id': subscriptionId });
+        if (user) {
+          await Payment.create({
+            payment_id: paymentId,
+            subscription_id: subscriptionId,
+            signature: razorpaySignature,
+          });
+
+          user.subscription.status = 'active';
+          await user.save();
+          console.log(`✅ Subscription activated for user: ${user.email}`);
+        } else {
+          console.log(`⚠️ User not found for subscription ID: ${subscriptionId}`);
+        }
+      }
+    } else if (event.event === 'payment.failed') {
+      const { payment } = event.payload;
+      const subscriptionId = payment.entity.subscription_id;
+      console.log(`❌ Payment failed for subscription ID: ${subscriptionId}`);
+    }
+
+    // Always acknowledge Razorpay
+    return res.status(200).json({ status: 'ok' });
+  } catch (error) {
+    console.error('❌ Webhook processing error:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+};
+
 
 export const cancelSubscription = async (req, res, next) => {
   const { id } = req.user;
@@ -133,8 +195,8 @@ export const cancelSubscription = async (req, res, next) => {
       : Number.POSITIVE_INFINITY; // if not found, skip refund
     const refundPeriod = 14 * 24 * 60 * 60 * 1000;
 
-    if (timeSubscribed <= refundPeriod && payment?.Payment_id) {
-      await razorPay.payments.refund(payment.Payment_id, { speed: "optimum" });
+    if (timeSubscribed <= refundPeriod && payment?.payment_id) {
+        await razorPay.payments.refund(payment.payment_id, { speed: "optimum" });
     }
 
     // Clear user subscription
@@ -153,6 +215,7 @@ export const cancelSubscription = async (req, res, next) => {
     return next(errorhandler(400, error.message));
   }
 };
+
 export const allPayments = async (req, res, next) => {
   try {
     // Fetch all payments
