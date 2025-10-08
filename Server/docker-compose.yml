@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  # The Backend Service (Node.js/Express)
+  server:
+    build:
+      context: . # Uses the current directory (./Server) for the Dockerfile
+    ports:
+      - "10000:10000" # Maps port 10000 on your machine to port 10000 in the container
+    restart: always
+    env_file:
+      - ./.env # Load environment variables from the .env file in the Server directory
+    networks:
+      - lms-network
+ 
+# Define the network for the backend
+networks:
+  lms-network:
+    driver: bridge
