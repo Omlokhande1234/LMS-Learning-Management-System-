@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # The Frontend Service (React + Nginx)
+  frontend:
+    build:
+      context: ./Frontend/LMS-Frontend # Tells Docker to look for the Dockerfile in the './Frontend/LMS-Frontend' directory
+    ports:
+      - "5173:80" # Maps port 80 on your machine to port 80 in the container
+    restart: always
+    env_file:
+      - ./Frontend/LMS-Frontend/.env # Load environment variables from the .env file in the Frontend directory
+    networks:
+      - lms-network
+
+  # The Backend Service (Node.js/Express)
+  server:
+    build:
+      context: ./Server # Tells Docker to look for the Dockerfile in the './Server' directory
+    ports:
+      - "10000:10000" # Maps port 10000 on your machine to port 10000 in the container
+    restart: always
+    env_file:
+      - ./Server/.env # Load environment variables from the .env file in the Server directory
+    networks:
+      - lms-network
+
+# Define the network that allows containers to communicate
+networks:
+  lms-network:
+    driver: bridge
